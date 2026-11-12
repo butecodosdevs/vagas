@@ -87,7 +87,7 @@ npm test
 | `SHEET_ID` | Secret ou variável, opcional | Id da planilha. Sem isso, vale o id padrão acima. |
 | `MODERATION_ENABLED` | Variável de repositório, opcional | `true` ou `false`. Padrão `false`. |
 
-A URL do Apps Script fica em `data/forms.yaml`, na chave `scriptUrl`. O valor atual é `https://script.google.com/macros/s/AKfycbx8k9Ge5Yt1emFY9zizRvjVmDJx7xogNyyhI6Rafl6Br8adAgs0UX-r_BF5uUiJyNHh/exec`. Se a chave voltar a conter `PLACEHOLDER`, o formulário avisa e não envia.
+A URL do Apps Script fica em `data/forms.yaml`, na chave `scriptUrl`. O valor atual é `https://script.google.com/macros/s/AKfycbzpI1PDL1ShmXnN5EzSgwB-B6hSN6T0Z4h6zdDYDFBJtQYocrB0OHNt4YdhxFsFFsuA/exec`. Se a chave voltar a conter `PLACEHOLDER`, o formulário avisa e não envia.
 
 ## CI e publicação
 
