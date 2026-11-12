@@ -1,0 +1,30 @@
+---
+layout: default
+---
+{@io.quarkiverse.roq.frontmatter.runtime.model.DocumentPage page}
+{@io.quarkiverse.roq.frontmatter.runtime.model.Site site}
+<article class="ficha">
+  <p class="voltar"><a href="{=site.url('candidatos')}">Todas as pessoas</a></p>
+  {#if page.data('exemplo')}
+  <p class="selo">Exemplo fictício</p>
+  {/if}
+  <h1>{=page.data('nome')}</h1>
+  <p class="meta">
+    {#if page.data('cargo_senioridade')}<span>{=page.data('cargo_senioridade')}</span>{/if}
+    {#if page.data('modalidade')}<span class="chip">{=page.data('modalidade')}</span>{/if}
+    {#if page.date}<time datetime="{=page.date.iso}">{=page.date.format('dd/MM/yyyy')}</time>{/if}
+  </p>
+  {#if page.data('stack')}
+  <h2>Stack</h2>
+  <p class="texto">{=page.data('stack')}</p>
+  {/if}
+  <h2>Experiência</h2>
+  <p class="texto">{=page.data('resumo_experiencia')}</p>
+  {#if page.data('pretensao')}
+  <h2>Pretensão</h2>
+  <p class="texto">{=page.data('pretensao')}</p>
+  {/if}
+  <div class="nota">
+    {#insert /}
+  </div>
+</article>

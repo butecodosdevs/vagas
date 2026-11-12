@@ -1,0 +1,323 @@
+:root {
+  --brown: #3b2218;
+  --brown-dark: #2a170f;
+  --brown-light: #5c3a2a;
+  --amber: #f5a623;
+  --amber-light: #f8c15c;
+  --cream: #f5f0e8;
+  --cream-soft: rgba(245, 240, 232, 0.72);
+  --navy: #1e2432;
+  --line: rgba(255, 255, 255, 0.12);
+  --font: "Inter", system-ui, sans-serif;
+  --heading: "Space Grotesk", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+  --radius: 16px;
+  --sombra: 0 0 40px rgba(245, 166, 35, 0.12);
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--cream);
+  background-color: var(--brown);
+  background-image:
+    radial-gradient(ellipse at top, rgba(245, 166, 35, 0.16), transparent 42%),
+    linear-gradient(180deg, rgba(42, 23, 15, 0.2), transparent 28%);
+  line-height: 1.6;
+}
+
+body::before {
+  content: "01  10  11  00  01  10  11  00";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  color: rgba(245, 240, 232, 0.045);
+  font-family: var(--mono);
+  font-size: 1.4rem;
+  letter-spacing: 0.7rem;
+  line-height: 3.2rem;
+  word-break: break-all;
+  pointer-events: none;
+}
+
+img { max-width: 100%; height: auto; }
+
+a { color: var(--amber-light); text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+a:hover { color: var(--cream); }
+
+h1, h2, h3, .marca span, .botao, .menu-largo, .menu-curto summary {
+  font-family: var(--heading);
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: clamp(2.4rem, 6vw, 4.6rem); line-height: 1.05; margin: 0 0 0.6rem; }
+h2 { font-size: 1.35rem; margin: 1.5rem 0 0.4rem; }
+p { margin: 0 0 0.8rem; }
+
+.pular {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  background: var(--amber);
+  color: var(--navy);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  z-index: 20;
+}
+.pular:focus { top: 0.6rem; }
+
+.topo {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 6vw;
+  background: rgba(42, 23, 15, 0.92);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(14px);
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--cream);
+  text-decoration: none;
+}
+.marca img { width: 132px; height: auto; }
+.marca span {
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: var(--amber);
+}
+
+.menu-largo {
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+  font-size: 0.95rem;
+}
+.menu-largo a { color: rgba(245, 240, 232, 0.78); text-decoration: none; }
+.menu-largo a:hover { color: var(--amber); }
+.menu-largo a.botao-ambar,
+.menu-largo a.botao-ambar:hover { color: var(--navy); }
+
+.menu-curto { display: none; }
+.menu-curto summary {
+  cursor: pointer;
+  list-style: none;
+  color: var(--cream);
+  font-weight: 600;
+}
+.menu-curto summary::-webkit-details-marker { display: none; }
+.menu-curto nav {
+  position: absolute;
+  right: 6vw;
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.7rem;
+  padding: 1rem;
+  min-width: 12rem;
+  background: rgba(42, 23, 15, 0.98);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.menu-curto a { color: var(--cream); text-decoration: none; }
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 10px;
+  padding: 0.75rem 1.15rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+.botao-ambar { background: var(--amber); color: var(--navy); }
+.botao-ambar:hover { background: var(--amber-light); color: var(--navy); }
+.botao-fantasma {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--cream);
+  border-color: rgba(245, 166, 35, 0.45);
+}
+.botao-fantasma:hover { border-color: var(--amber); color: var(--amber-light); }
+.botao-compacto { padding: 0.45rem 0.85rem; }
+
+.hero, .pagina, .ficha, .formulario-pagina {
+  width: min(1080px, calc(100% - 12vw));
+  margin: 0 auto;
+}
+
+.hero { padding: 4.5rem 0 3rem; text-align: center; }
+.sobretitulo {
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.gradiente {
+  background: linear-gradient(90deg, var(--amber), var(--amber-light));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.lead {
+  max-width: 40rem;
+  margin: 0.4rem auto 1.6rem;
+  color: var(--cream-soft);
+  font-size: 1.12rem;
+}
+.acoes, .acoes-duplas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  padding-bottom: 3.5rem;
+}
+.cartao, .ficha, .formulario, .aviso, .ok {
+  background: rgba(42, 23, 15, 0.72);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--sombra);
+}
+.cartao { padding: 1.2rem 1.25rem 1.3rem; }
+.cartao h2, .cartao h3 { margin-top: 0; }
+.cartao p:last-child { margin-bottom: 0; }
+.cartao a.titulo { color: var(--cream); text-decoration: none; font-family: var(--heading); font-size: 1.25rem; font-weight: 600; }
+.cartao a.titulo:hover { color: var(--amber-light); }
+
+.pagina { padding: 2.4rem 0 3.5rem; }
+.pagina-topo { max-width: 40rem; margin-bottom: 1.4rem; }
+.lista, .grade-cards {
+  display: grid;
+  gap: 1rem;
+}
+.grade-cards { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+
+.meta, .chips { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; color: var(--cream-soft); }
+.chip, .selo {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.12rem 0.6rem;
+  background: rgba(245, 166, 35, 0.14);
+  color: var(--amber-light);
+  font-size: 0.82rem;
+}
+.selo { margin-bottom: 0.7rem; border: 1px solid rgba(245, 166, 35, 0.4); }
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+.filtros label, .formulario label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.92rem;
+  color: var(--cream-soft);
+}
+.filtros label { min-width: 14rem; flex: 1; }
+
+input, select, textarea {
+  width: 100%;
+  font: inherit;
+  color: var(--cream);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem;
+}
+textarea { min-height: 8rem; resize: vertical; }
+input:focus, select:focus, textarea:focus,
+a:focus-visible, button:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+  border-color: transparent;
+}
+input::placeholder, textarea::placeholder {
+  color: rgba(245, 240, 232, 0.78);
+  opacity: 1;
+}
+select option { color: var(--navy); }
+
+.ficha, .formulario-pagina { padding: 2.2rem 0 3.5rem; }
+.ficha { padding: 1.5rem; }
+.texto { white-space: pre-wrap; }
+.nota { color: var(--cream-soft); margin-top: 1.4rem; }
+.links { padding-left: 1.1rem; }
+.voltar { margin-bottom: 0.4rem; }
+
+.formulario { padding: 1.3rem; display: grid; gap: 0.9rem; }
+.formulario button {
+  justify-self: start;
+  cursor: pointer;
+  font: inherit;
+}
+.formulario label.consentimento {
+  display: flex;
+  flex-direction: row;
+  gap: 0.7rem;
+  align-items: flex-start;
+  color: var(--cream);
+}
+.formulario label.consentimento input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.2rem;
+  flex: 0 0 auto;
+}
+.pote-de-mel {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.aviso, .ok { padding: 1rem 1.1rem; margin-bottom: 1rem; }
+.aviso { border-color: rgba(245, 166, 35, 0.55); }
+.vazio { color: var(--cream-soft); }
+
+[hidden] { display: none !important; }
+
+.rodape {
+  border-top: 1px solid var(--line);
+  padding: 2rem 6vw 2.4rem;
+  color: var(--cream-soft);
+  background: rgba(42, 23, 15, 0.55);
+}
+.rodape-grade {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.rodape nav { display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-start; }
+.marca-rodape { font-family: var(--heading); color: var(--cream); font-size: 1.15rem; }
+.rodape-fim { margin-top: 1.4rem; font-size: 0.9rem; }
+
+@media (max-width: 860px) {
+  .menu-largo { display: none; }
+  .menu-curto { display: block; }
+  .marca img { width: 108px; }
+  .hero { padding-top: 3rem; }
+}

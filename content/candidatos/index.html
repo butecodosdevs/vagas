@@ -1,0 +1,33 @@
+---
+layout: default
+title: Candidatos
+description: Apresentações de quem está na procura no mural Vagas do Buteco.
+---
+
+<section class="pagina">
+  <header class="pagina-topo">
+    <p class="sobretitulo">Mural</p>
+    <h1>Candidatos</h1>
+    <p>Apresentações curtas de quem topa um papo. Os cards de exemplo são fictícios e saem quando a planilha assumir o mural.</p>
+    <p><a class="botao botao-ambar" href="{=site.url('cadastro/candidato')}">Quero me apresentar</a></p>
+  </header>
+  {#include partials/filtros /}
+  <div class="grade-cards" data-lista>
+    {#for pessoa in site.collections.candidatos.sortByDate(true)}
+    <article class="cartao" data-cartao data-modalidade="{=pessoa.data('modalidade')}" data-busca="{=pessoa.data('nome')} {=pessoa.data('cargo_senioridade')} {=pessoa.data('stack')} {=pessoa.data('resumo_experiencia')}">
+      {#if pessoa.data('exemplo')}<p class="selo">Exemplo</p>{/if}
+      <h2><a class="titulo" href="{=pessoa.url}">{=pessoa.data('nome')}</a></h2>
+      <p class="meta">
+        {#if pessoa.data('cargo_senioridade')}<span>{=pessoa.data('cargo_senioridade')}</span>{/if}
+        {#if pessoa.data('modalidade')}<span class="chip">{=pessoa.data('modalidade')}</span>{/if}
+      </p>
+      <p>{=pessoa.data('stack')}</p>
+      <p>{=pessoa.description}</p>
+    </article>
+    {#else}
+    <p class="vazio">Ainda não há apresentações publicadas.</p>
+    {/for}
+  </div>
+  <p class="vazio" data-vazio hidden>Nenhuma apresentação com esse filtro.</p>
+</section>
+<script src="{=site.url('js/filtros.js')}" defer></script>

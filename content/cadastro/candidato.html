@@ -1,0 +1,54 @@
+---
+layout: default
+title: Me apresentar
+description: Formulário de apresentação para o mural Vagas do Buteco.
+---
+
+<section class="formulario-pagina">
+  <header class="pagina-topo">
+    <p class="sobretitulo">Cadastro</p>
+    <h1>Me apresentar</h1>
+    <p>Uma apresentação curta, no formato do mural. Os dados informados aqui são publicados publicamente.</p>
+  </header>
+  <p class="ok" data-ok hidden>Recebemos sua apresentação. O mural atualiza sozinho a cada 6 horas, depois que a planilha é sincronizada.</p>
+  <form class="formulario" data-formulario method="post" action="{=cdi:forms.scriptUrl}">
+    <p class="aviso" data-aviso hidden></p>
+    <input type="hidden" name="tipo" value="candidato">
+    <p class="pote-de-mel" aria-hidden="true">
+      <label>Site <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+    </p>
+    <label>Nome
+      <input name="nome" required maxlength="80" autocomplete="name">
+    </label>
+    <label>Cargo / senioridade
+      <input name="cargo_senioridade" required maxlength="120" placeholder="Ex.: Dev backend pleno">
+    </label>
+    <label>Stack técnica / principais ferramentas
+      <input name="stack" required maxlength="300" placeholder="Ex.: Java, Quarkus, PostgreSQL">
+    </label>
+    <label>Resumo de experiência
+      <textarea name="resumo_experiencia" required maxlength="2000"></textarea>
+    </label>
+    <label>LinkedIn / portfólio / CV (URL)
+      <input name="links" type="url" required maxlength="500" placeholder="https://" pattern="https?://.+" title="Use um link que comece com http:// ou https://">
+    </label>
+    <label>Pretensão
+      <input name="pretensao" maxlength="120" placeholder="Ex.: a combinar, CLT, PJ">
+    </label>
+    <label>Modalidade
+      <select name="modalidade" required>
+        <option value="">Selecione</option>
+        <option value="remoto">Remoto</option>
+        <option value="presencial">Presencial</option>
+        <option value="híbrido">Híbrido</option>
+      </select>
+    </label>
+    <label class="consentimento">
+      <input type="checkbox" name="consentimento" value="sim" required>
+      <span>Li e concordo que estes dados sejam publicados publicamente no mural Vagas do Buteco, visível para qualquer pessoa.</span>
+    </label>
+    <button class="botao botao-ambar" type="submit">Publicar minha apresentação</button>
+    <iframe name="envio-candidato" title="Resposta do envio" hidden></iframe>
+  </form>
+</section>
+<script src="{=site.url('js/formulario.js')}" defer></script>

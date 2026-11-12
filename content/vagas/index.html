@@ -1,0 +1,32 @@
+---
+layout: default
+title: Vagas
+description: Vagas publicadas no mural Vagas do Buteco.
+---
+
+<section class="pagina">
+  <header class="pagina-topo">
+    <p class="sobretitulo">Mural</p>
+    <h1>Vagas</h1>
+    <p>Oportunidades enviadas pela comunidade. Dá para filtrar por modalidade e por stack: nas vagas, a busca olha cargo, requisitos e experiência.</p>
+    <p><a class="botao botao-ambar" href="{=site.url('cadastro/vaga')}">Publicar uma vaga</a></p>
+  </header>
+  {#include partials/filtros /}
+  <div class="lista" data-lista>
+    {#for vaga in site.collections.vagas.sortByDate(true)}
+    <article class="cartao" data-cartao data-modalidade="{=vaga.data('modalidade')}" data-busca="{=vaga.data('empresa')} {=vaga.data('cargo_senioridade')} {=vaga.data('requisitos_obrigatorios')} {=vaga.data('experiencia_desejavel')}">
+      {#if vaga.data('exemplo')}<p class="selo">Exemplo</p>{/if}
+      <p class="meta">
+        {#if vaga.data('empresa')}<span>{=vaga.data('empresa')}</span>{/if}
+        {#if vaga.data('modalidade')}<span class="chip">{=vaga.data('modalidade')}</span>{/if}
+      </p>
+      <h2><a class="titulo" href="{=vaga.url}">{=vaga.title}</a></h2>
+      <p>{=vaga.description}</p>
+    </article>
+    {#else}
+    <p class="vazio">Ainda não há vagas publicadas.</p>
+    {/for}
+  </div>
+  <p class="vazio" data-vazio hidden>Nenhuma vaga com esse filtro.</p>
+</section>
+<script src="{=site.url('js/filtros.js')}" defer></script>
