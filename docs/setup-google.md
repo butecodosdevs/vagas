@@ -42,8 +42,8 @@ Aba **Vagas**:
    - Executar como: **Eu**
    - Quem pode acessar: **Qualquer pessoa**
 4. Copie a URL que termina em `/exec`.
-5. No repositório, troque o `PLACEHOLDER` de `scriptUrl` em `data/forms.yaml`.
-6. Faça um push para `main` (ou rode o workflow **Publicar site**) para o formulário passar a apontar para essa URL.
+5. Grave essa URL em `scriptUrl` dentro de `data/forms.yaml`. A implantação atual já está lá: `https://script.google.com/macros/s/AKfycbx8k9Ge5Yt1emFY9zizRvjVmDJx7xogNyyhI6Rafl6Br8adAgs0UX-r_BF5uUiJyNHh/exec`. Se houver uma implantação nova, troque a chave de novo.
+6. Faça um push para `main` (ou rode o workflow **Publicar site**) para o formulário publicado passar a usar essa URL.
 
 Propriedades do script, em **Configurações do projeto > Propriedades do script**:
 
@@ -59,7 +59,7 @@ O campo escondido `website` é um honeypot. Se vier preenchido, o script respond
 
 ## O que o mantenedor ainda configura
 
-- Publicar o Apps Script e colocar a URL em `vagas.script-url`.
+- A URL do Apps Script já está em `scriptUrl`, no arquivo `data/forms.yaml`. Uma implantação nova exige atualizar essa chave.
 - Em **Settings > Pages**, fonte **GitHub Actions**.
 - Se a branch `main` estiver protegida, permitir o push do `github-actions[bot]` para o workflow de sync criar o commit.
 - Opcional: variável de repositório `MODERATION_ENABLED` (`true` ou `false`, padrão `false`) e a propriedade homônima no Apps Script.

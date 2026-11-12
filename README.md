@@ -76,7 +76,7 @@ python -m pytest
 | `SHEET_ID` | Secret ou variável, opcional | Id da planilha. Sem isso, vale o id padrão acima. |
 | `MODERATION_ENABLED` | Variável de repositório, opcional | `true` ou `false`. Padrão `false`. |
 
-A URL do Apps Script fica em `data/forms.yaml`, na chave `scriptUrl`. Enquanto estiver com `PLACEHOLDER`, o formulário avisa e não envia.
+A URL do Apps Script fica em `data/forms.yaml`, na chave `scriptUrl`. O valor atual é `https://script.google.com/macros/s/AKfycbx8k9Ge5Yt1emFY9zizRvjVmDJx7xogNyyhI6Rafl6Br8adAgs0UX-r_BF5uUiJyNHh/exec`. Se a chave voltar a conter `PLACEHOLDER`, o formulário avisa e não envia.
 
 ## CI e publicação
 
@@ -90,7 +90,7 @@ Em **Settings > Pages**, a fonte precisa ser **GitHub Actions**.
 ## O que configurar na mão
 
 1. Pages com fonte GitHub Actions.
-2. Implantar o Apps Script (qualquer pessoa pode acessar) e colocar a URL `/exec` em `scriptUrl`, no arquivo `data/forms.yaml`.
+2. A URL do Apps Script já está em `scriptUrl`, no arquivo `data/forms.yaml`. Se a implantação mudar, atualize essa chave.
 3. Secret `GOOGLE_SERVICE_ACCOUNT_JSON` e a planilha compartilhada com a conta como Viewer. Isso já foi feito para a planilha atual.
 4. Se `main` tiver proteção de branch, deixar o `github-actions[bot]` fazer push no sync.
 5. Opcional: `MODERATION_ENABLED` no repositório e a propriedade de mesmo nome no Apps Script.
