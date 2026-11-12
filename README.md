@@ -80,8 +80,8 @@ A URL do Apps Script fica em `data/forms.yaml`, na chave `scriptUrl`. Enquanto e
 
 ## CI e publicação
 
-- **CI**, em pull request e em disparo manual: testes, `roq generate` e a checagem da planilha.
-- A checagem (`sheet-connectivity`) só roda em PR de branch deste repositório e em `workflow_dispatch`. Autentica com o secret, lê a linha 1 de **Candidatos** e **Vagas** e compara com o esquema. Não imprime o JSON.
+- **CI**, em pull request e em disparo manual: testes e `roq generate`. Esse workflow não recebe o secret.
+- **Checagem da planilha**: `pull_request_target` (código da branch padrão, nunca o do PR) e `workflow_dispatch`. Autentica com o secret, lê a linha 1 de **Candidatos** e **Vagas** e compara com o esquema. Não imprime o JSON. Fork não roda. O workflow só passa a valer depois do merge em `main`.
 - **Sincronizar planilha**: cron `0 */6 * * *` e disparo manual. Commit só quando o Markdown mudou.
 - **Publicar site**: push em `main`, disparo manual e depois de uma sincronização bem-sucedida. Gera com Roq e publica com `actions/deploy-pages`.
 

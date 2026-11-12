@@ -115,14 +115,24 @@ def test_sanitizar_nao_deixa_vazar_chave():
 
 
 def test_workflow_de_ci_nao_imprime_o_secret():
-    texto = Path(__file__).resolve().parents[1].joinpath(".github/workflows/ci.yml").read_text(encoding="utf-8")
-    assert "sheet-connectivity" in texto
-    assert "secrets.GOOGLE_SERVICE_ACCOUNT_JSON" in texto
-    assert "workflow_dispatch" in texto
-    assert "pull_request" in texto
-    assert "head.repo.full_name" in texto
-    assert "echo \"$GOOGLE_SERVICE_ACCOUNT_JSON\"" not in texto
-    assert "printenv" not in texto
+    raiz = Path(__file__).resolve().parents[1]
+    ci = (raiz / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+    planilha = (raiz / ".github/workflows/sheet-check.yml").read_text(encoding="utf-8")
+    assert "GOOGLE_SERVICE_ACCOUNT_JSON" not in ci
+    assert "pull_request:" in ci
+    assert "pull_request_target" not in ci
+    assert "pull_request_target:" in planilha
+    assert "sheet-connectivity" in planilha
+    assert "secrets.GOOGLE_SERVICE_ACCOUNT_JSON" in planilha
+    assert "pull_request.base.sha" in planilha
+    assert "head.sha" not in planilha
+    assert "head.repo.full_name" in planilha
+    assert "echo \"$GOOGLE_SERVICE_ACCOUNT_JSON\"" not in planilha
+    assert "printenv" not in planilha
+    formulario = (raiz / "public/js/formulario.js").read_text(encoding="utf-8")
+    assert "vagas-do-buteco" in formulario
+    assert "dados.ok" in formulario
+    assert "script.google.com" in formulario
 
 
 def test_cabecalho_obrigatorio_ausente_falha():
@@ -235,6 +245,19 @@ def test_removido_apaga_arquivo_e_preserva_exemplo(tmp_path: Path):
     assert not alvo.exists()
     assert exemplo.is_file()
     assert "Exemplo." in exemplo.read_text(encoding="utf-8")
+
+
+def test_exemplo_sai_quando_a_aba_tem_linha_publicavel(tmp_path: Path):
+    content = tmp_path / "content"
+    exemplo_vaga = content / "vagas" / "exemplo-vaga-backend.md"
+    exemplo_pessoa = content / "candidatos" / "exemplo-candidato-ana.md"
+    for caminho in (exemplo_vaga, exemplo_pessoa):
+        caminho.parent.mkdir(parents=True, exist_ok=True)
+        caminho.write_text("---\nlayout: vaga\nexemplo: true\n---\n\nExemplo.\n", encoding="utf-8")
+    sync_content(content, [], [vaga(id="v-real", status="publicado", empresa="Real")], moderation_enabled=False)
+    assert not exemplo_vaga.exists()
+    assert exemplo_pessoa.is_file()
+    assert (content / "vagas" / "v-real.md").is_file()
 
 
 def test_moderacao_ligada_so_publica_aprovado_e_remove_o_resto(tmp_path: Path):

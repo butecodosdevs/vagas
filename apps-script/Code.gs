@@ -33,7 +33,12 @@ var LIMITES = {
 var ABAS = { candidato: 'Candidatos', vaga: 'Vagas' };
 
 function doGet() {
-  return HtmlService.createHtmlOutput(pagina('Endpoint do mural', '<p>Este endereço recebe os formulários de Vagas do Buteco.</p>'));
+  return HtmlService.createHtmlOutput(pagina(
+    'Endpoint do mural',
+    '<p>Este endereço recebe os formulários de Vagas do Buteco.</p>',
+    false,
+    ''
+  ));
 }
 
 function doPost(e) {
@@ -165,20 +170,34 @@ function siteUrl() {
 function htmlOk() {
   return HtmlService.createHtmlOutput(pagina(
     'Envio recebido',
-    '<p>Recebemos os dados. O mural atualiza sozinho a cada 6 horas.</p><p><a href="' + siteUrl() + '">Voltar ao mural</a></p>'
+    '<p>Recebemos os dados. O mural atualiza sozinho a cada 6 horas.</p><p><a href="' + siteUrl() + '">Voltar ao mural</a></p>',
+    true,
+    ''
   ));
 }
 
 function htmlErro(mensagem) {
   return HtmlService.createHtmlOutput(pagina(
     'Não deu para enviar',
-    '<p>' + escapar(mensagem) + '</p><p><a href="' + siteUrl() + '">Voltar ao mural</a></p>'
+    '<p>' + escapar(mensagem) + '</p><p><a href="' + siteUrl() + '">Voltar ao mural</a></p>',
+    false,
+    mensagem
   ));
 }
 
-function pagina(titulo, corpo) {
+function sinalParaOSite(ok, mensagem) {
+  var json = JSON.stringify({
+    fonte: 'vagas-do-buteco',
+    ok: ok === true,
+    mensagem: texto(mensagem)
+  }).replace(/</g, '\\u003c');
+  return '<script>parent.postMessage(' + json + ',"*");</script>';
+}
+
+function pagina(titulo, corpo, ok, mensagem) {
   return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' +
     escapar(titulo) + '</title></head><body style="margin:0;font-family:Inter,system-ui,sans-serif;background:#3B2218;color:#F5F0E8">' +
+    sinalParaOSite(ok, mensagem) +
     '<main style="max-width:36rem;margin:4rem auto;padding:1.5rem"><h1 style="font-family:Space Grotesk,sans-serif">' +
     escapar(titulo) + '</h1>' + corpo + '</main></body></html>';
 }
