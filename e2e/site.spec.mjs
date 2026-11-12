@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
 const ARTEFATOS = "/opt/cursor/artifacts";
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx8k9Ge5Yt1emFY9zizRvjVmDJx7xogNyyhI6Rafl6Br8adAgs0UX-r_BF5uUiJyNHh/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpI1PDL1ShmXnN5EzSgwB-B6hSN6T0Z4h6zdDYDFBJtQYocrB0OHNt4YdhxFsFFsuA/exec";
 const CONFIRMACAO = `<!DOCTYPE html><html><body><script>parent.postMessage({fonte:"vagas-do-buteco",ok:true,mensagem:""},"*");</script></body></html>`;
 
 test.beforeAll(() => {
