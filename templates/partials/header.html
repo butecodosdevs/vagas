@@ -1,0 +1,26 @@
+{@io.quarkiverse.roq.frontmatter.runtime.model.Page page}
+{@io.quarkiverse.roq.frontmatter.runtime.model.Site site}
+<a class="pular" href="#conteudo">Ir para o conteúdo</a>
+<header class="topo">
+  <a class="marca" href="{=site.url}">
+    <img src="{=site.url('images/logo.png')}" alt="Buteco dos Devs" width="168" height="78">
+    <span>Vagas</span>
+  </a>
+  <nav class="menu-largo" aria-label="Principal">
+    <a href="{=site.url('vagas')}">Vagas</a>
+    <a href="{=site.url('candidatos')}">Candidatos</a>
+    <a href="{=site.url('cadastro/candidato')}">Me apresentar</a>
+    <a href="{=site.url('cadastro/vaga')}">Publicar vaga</a>
+    <a class="botao botao-ambar botao-compacto" href="https://discord.gg/buteco-dos-devs" rel="noopener noreferrer">Entrar no Discord</a>
+  </nav>
+  <details class="menu-curto">
+    <summary>Menu</summary>
+    <nav aria-label="Principal">
+      <a href="{=site.url('vagas')}">Vagas</a>
+      <a href="{=site.url('candidatos')}">Candidatos</a>
+      <a href="{=site.url('cadastro/candidato')}">Me apresentar</a>
+      <a href="{=site.url('cadastro/vaga')}">Publicar vaga</a>
+      <a href="https://discord.gg/buteco-dos-devs" rel="noopener noreferrer">Entrar no Discord</a>
+    </nav>
+  </details>
+</header>

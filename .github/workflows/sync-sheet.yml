@@ -1,0 +1,43 @@
+name: Sincronizar planilha
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sincronizar-planilha
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Gerar conteúdo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependências
+        run: python -m pip install -r requirements.txt
+      - name: Ler a planilha e gerar Markdown
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          SHEET_ID: ${{ secrets.SHEET_ID || vars.SHEET_ID || '1mMjsxHBRritkBUIEz4-TsNLBofVC7crG8WNrSwtegsQ' }}
+          MODERATION_ENABLED: ${{ vars.MODERATION_ENABLED || 'false' }}
+        run: python scripts/sync_sheet.py
+      - name: Commit só se houver diff
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/vagas content/candidatos
+          if git diff --staged --quiet; then
+            echo "Nenhuma mudança para publicar."
+            exit 0
+          fi
+          git commit -m "Sincroniza vagas e candidatos da planilha"
+          git push
