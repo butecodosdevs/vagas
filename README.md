@@ -66,6 +66,17 @@ Testes do gerador:
 ```bash
 python -m pip install -r requirements.txt
 python -m pytest
+node --test tests/apps_script.test.mjs
+```
+
+O e2e sobe o site gerado e usa o Chromium. Ele não chama o Apps Script de verdade: o envio é interceptado.
+
+```bash
+roq generate
+cd e2e
+npm ci
+npx playwright install --with-deps chromium
+npm test
 ```
 
 ## Secrets e variáveis

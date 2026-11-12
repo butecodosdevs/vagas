@@ -10,6 +10,7 @@ Variáveis:
 from __future__ import annotations
 
 import json
+import logging
 import os
 import sys
 from pathlib import Path
@@ -19,6 +20,7 @@ from contentgen import (
     DEFAULT_SHEET_ID,
     VAGA_HEADERS,
     rows_from_values,
+    sanitizar_mensagem,
     sync_content,
 )
 
@@ -48,7 +50,22 @@ def fetch_tab(service, spreadsheet_id: str, aba: str, obrigatorios: list[str]) -
     return rows_from_values(resposta.get("values", []), required=obrigatorios)
 
 
+def relatar_falha(erro: BaseException) -> int:
+    """Imprime o erro já filtrado. A chave da conta de serviço não entra no log."""
+    print(sanitizar_mensagem(f"Não foi possível sincronizar: {erro}"), file=sys.stderr)
+    return 1
+
+
 def main() -> int:
+    logging.getLogger("googleapiclient").setLevel(logging.ERROR)
+    logging.getLogger("google.auth").setLevel(logging.ERROR)
+    try:
+        return _executar()
+    except Exception as erro:  # noqa: BLE001 — a mensagem passa pelo filtro de segredo
+        return relatar_falha(erro)
+
+
+def _executar() -> int:
     bruto = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
     if not bruto:
         print("Defina o secret GOOGLE_SERVICE_ACCOUNT_JSON.", file=sys.stderr)

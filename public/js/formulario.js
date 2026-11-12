@@ -25,6 +25,11 @@
     });
 
     form.addEventListener("submit", function (eventoSubmit) {
+      var pote = form.querySelector('[name="website"]');
+      if (pote && pote.value.trim()) {
+        eventoSubmit.preventDefault();
+        return;
+      }
       if (form.action.indexOf("PLACEHOLDER") !== -1) {
         eventoSubmit.preventDefault();
         mostrarAviso("Este formulário ainda aponta para o endereço de exemplo. Quem mantém o site precisa publicar o Apps Script e trocar a URL em data/forms.yaml.");

@@ -14,7 +14,7 @@ description: Formulário para publicar uma vaga no mural Vagas do Buteco.
   <form class="formulario" data-formulario method="post" action="{=cdi:forms.scriptUrl}">
     <p class="aviso" data-aviso hidden></p>
     <input type="hidden" name="tipo" value="vaga">
-    <p class="pote-de-mel">
+    <p class="pote-de-mel" aria-hidden="true">
       <label>Site <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
     </p>
     <label>Empresa
@@ -30,7 +30,7 @@ description: Formulário para publicar uma vaga no mural Vagas do Buteco.
       <textarea name="experiencia_desejavel" maxlength="2000"></textarea>
     </label>
     <label>Link da vaga (URL)
-      <input name="link_vaga" type="url" maxlength="500" placeholder="https://">
+      <input name="link_vaga" type="url" maxlength="500" placeholder="https://" pattern="https?://.+" title="Use um link que comece com http:// ou https://">
     </label>
     <label>Modalidade
       <select name="modalidade" required>

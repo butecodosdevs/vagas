@@ -14,7 +14,7 @@ description: Formulário de apresentação para o mural Vagas do Buteco.
   <form class="formulario" data-formulario method="post" action="{=cdi:forms.scriptUrl}">
     <p class="aviso" data-aviso hidden></p>
     <input type="hidden" name="tipo" value="candidato">
-    <p class="pote-de-mel">
+    <p class="pote-de-mel" aria-hidden="true">
       <label>Site <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
     </p>
     <label>Nome
@@ -30,7 +30,7 @@ description: Formulário de apresentação para o mural Vagas do Buteco.
       <textarea name="resumo_experiencia" required maxlength="2000"></textarea>
     </label>
     <label>LinkedIn / portfólio / CV (URL)
-      <input name="links" type="url" required maxlength="500" placeholder="https://">
+      <input name="links" type="url" required maxlength="500" placeholder="https://" pattern="https?://.+" title="Use um link que comece com http:// ou https://">
     </label>
     <label>Pretensão
       <input name="pretensao" maxlength="120" placeholder="Ex.: a combinar, CLT, PJ">

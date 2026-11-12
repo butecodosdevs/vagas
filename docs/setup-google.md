@@ -59,7 +59,7 @@ O campo escondido `website` é um honeypot. Se vier preenchido, o script respond
 
 ## O que o mantenedor ainda configura
 
-- A URL do Apps Script já está em `scriptUrl`, no arquivo `data/forms.yaml`. Uma implantação nova exige atualizar essa chave.
+- A URL do Apps Script já está em `scriptUrl`, no arquivo `data/forms.yaml`: `https://script.google.com/macros/s/AKfycbx8k9Ge5Yt1emFY9zizRvjVmDJx7xogNyyhI6Rafl6Br8adAgs0UX-r_BF5uUiJyNHh/exec`. Uma implantação nova exige atualizar essa chave. Se ela voltar a conter `PLACEHOLDER`, o formulário avisa e não envia.
 - Em **Settings > Pages**, fonte **GitHub Actions**.
 - Se a branch `main` estiver protegida, permitir o push do `github-actions[bot]` para o workflow de sync criar o commit.
 - Opcional: variável de repositório `MODERATION_ENABLED` (`true` ou `false`, padrão `false`) e a propriedade homônima no Apps Script.

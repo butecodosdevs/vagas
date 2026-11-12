@@ -83,13 +83,13 @@ function validar(tipo, dados) {
     comum.nome = campo(dados.nome, 'nome', true);
     comum.stack = campo(dados.stack, 'stack', true);
     comum.resumo_experiencia = campo(dados.resumo_experiencia, 'resumo_experiencia', true);
-    comum.links = urls(dados.links, true);
+    comum.links = urls(dados.links, true, 'links');
     comum.pretensao = campo(dados.pretensao, 'pretensao', false);
   } else {
     comum.empresa = campo(dados.empresa, 'empresa', true);
     comum.requisitos_obrigatorios = campo(dados.requisitos_obrigatorios, 'requisitos_obrigatorios', true);
     comum.experiencia_desejavel = campo(dados.experiencia_desejavel, 'experiencia_desejavel', false);
-    comum.link_vaga = dados.link_vaga ? urls(dados.link_vaga, true) : '';
+    comum.link_vaga = dados.link_vaga ? urls(dados.link_vaga, true, 'link_vaga') : '';
     comum.contato = campo(dados.contato, 'contato', true);
   }
   return comum;
@@ -97,7 +97,7 @@ function validar(tipo, dados) {
 
 function statusInicial() {
   var flag = texto(PropertiesService.getScriptProperties().getProperty('MODERATION_ENABLED')).toLowerCase();
-  if (flag === 'true' || flag === '1' || flag === 'sim') return 'pendente';
+  if (flag === 'true' || flag === '1' || flag === 'sim' || flag === 'yes' || flag === 'on') return 'pendente';
   return 'publicado';
 }
 
@@ -109,21 +109,23 @@ function campo(valor, nome, obrigatorio) {
   return limpo;
 }
 
-function urls(valor, obrigatorio) {
-  var bruto = campo(valor, 'links', false);
+function urls(valor, obrigatorio, nomeCampo) {
+  var bruto = campo(valor, nomeCampo || 'links', false);
   if (!bruto) {
     if (obrigatorio) throw new Error('Informe um link http(s).');
     return '';
   }
-  if (bruto.length > (LIMITES.links || 500) && bruto.length > (LIMITES.link_vaga || 500)) {
-    throw new Error('O link passou do limite de caracteres.');
-  }
   var partes = bruto.split(/[\s,;]+/);
   var saida = [];
   partes.forEach(function (parte) {
-    var url = parte.replace(/[),.\]]+$/, '');
+    var url = parte.replace(/[.,\]]+$/, '');
     if (!url) return;
     if (!/^https?:\/\//i.test(url)) throw new Error('Use apenas links http ou https.');
+    if (/[<>"'`{}\\]|[\u0000-\u001F\u0085\u2028\u2029]/.test(url)) {
+      throw new Error('O link tem caracteres que o mural não aceita.');
+    }
+    var host = url.replace(/^https?:\/\//i, '').split(/[\/?#]/)[0];
+    if (!host) throw new Error('Informe um link http(s) com domínio.');
     saida.push(url);
   });
   if (!saida.length && obrigatorio) throw new Error('Informe um link http(s).');
@@ -152,7 +154,7 @@ function acrescentar(aba, cabecalhos, valores) {
     if (header.indexOf(nome) === -1) throw new Error('Cabeçalho ausente na aba ' + aba + ': ' + nome);
   });
   var linha = header.map(function (nome) {
-    return Object.prototype.hasOwnProperty.call(valores, nome) ? valores[nome] : '';
+    return Object.prototype.hasOwnProperty.call(valores, nome) ? celula(valores[nome]) : '';
   });
   var destino = sheet.getRange(sheet.getLastRow() + 1, 1, 1, linha.length);
   destino.setNumberFormat('@');
@@ -163,14 +165,23 @@ function texto(valor) {
   return valor === null || valor === undefined ? '' : String(valor).trim();
 }
 
+function celula(valor) {
+  var limpo = texto(valor);
+  // Aspas simples forçam texto. Evita fórmula (=, +, -, @) executando na planilha.
+  if (/^[=+\-@]/.test(limpo)) return "'" + limpo;
+  return limpo;
+}
+
 function siteUrl() {
-  return texto(PropertiesService.getScriptProperties().getProperty('SITE_URL')) || SITE_PADRAO;
+  var url = texto(PropertiesService.getScriptProperties().getProperty('SITE_URL'));
+  if (!/^https:\/\/[^\s<>"'`{}\\]+$/.test(url)) return SITE_PADRAO;
+  return url;
 }
 
 function htmlOk() {
   return HtmlService.createHtmlOutput(pagina(
     'Envio recebido',
-    '<p>Recebemos os dados. O mural atualiza sozinho a cada 6 horas.</p><p><a href="' + siteUrl() + '">Voltar ao mural</a></p>',
+    '<p>Recebemos os dados. O mural atualiza sozinho a cada 6 horas.</p><p><a href="' + escapar(siteUrl()) + '">Voltar ao mural</a></p>',
     true,
     ''
   ));
@@ -179,7 +190,7 @@ function htmlOk() {
 function htmlErro(mensagem) {
   return HtmlService.createHtmlOutput(pagina(
     'Não deu para enviar',
-    '<p>' + escapar(mensagem) + '</p><p><a href="' + siteUrl() + '">Voltar ao mural</a></p>',
+    '<p>' + escapar(mensagem) + '</p><p><a href="' + escapar(siteUrl()) + '">Voltar ao mural</a></p>',
     false,
     mensagem
   ));
