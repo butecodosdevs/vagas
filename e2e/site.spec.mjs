@@ -3,7 +3,8 @@ import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
 const ARTEFATOS = "/opt/cursor/artifacts";
-const MOCK = "https://script.google.com/macros/s/mock-endpoint/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx8k9Ge5Yt1emFY9zizRvjVmDJx7xogNyyhI6Rafl6Br8adAgs0UX-r_BF5uUiJyNHh/exec";
+const CONFIRMACAO = `<!DOCTYPE html><html><body><script>parent.postMessage({fonte:"vagas-do-buteco",ok:true,mensagem:""},"*");</script></body></html>`;
 
 test.beforeAll(() => {
   fs.mkdirSync(ARTEFATOS, { recursive: true });
@@ -119,13 +120,13 @@ test("atalho de teclado e menu no celular", async ({ page }) => {
 
 test("candidato valida obrigatórios, url, consentimento, honeypot e envia ao endpoint", async ({ page }) => {
   let posts = 0;
-  await page.route("**/*", async (route) => {
+  await page.route(SCRIPT_URL, async (route) => {
     if (route.request().method() === "POST") posts += 1;
-    await route.continue();
+    await route.fulfill({ status: 200, contentType: "text/html", body: CONFIRMACAO });
   });
 
   await page.goto("cadastro/candidato/");
-  await expect(page.locator("form")).toHaveAttribute("action", /PLACEHOLDER/);
+  await expect(page.locator("form")).toHaveAttribute("action", SCRIPT_URL);
   await page.getByRole("button", { name: "Publicar minha apresentação" }).click();
   await expect.poll(() => page.locator('input[name="nome"]').evaluate((el) => el.validity.valueMissing)).toBe(true);
   expect(posts).toBe(0);
@@ -151,21 +152,12 @@ test("candidato valida obrigatórios, url, consentimento, honeypot e envia ao en
   await expect.poll(() => page.locator('input[name="consentimento"]').evaluate((el) => el.validity.valueMissing)).toBe(true);
   expect(posts).toBe(0);
 
-  await page.locator('input[name="consentimento"]').check();
-  await page.getByRole("button", { name: "Publicar minha apresentação" }).click();
-  await expect(page.locator("[data-aviso]")).toContainText("data/forms.yaml");
-  await expect(page.locator("form")).toBeVisible();
-  expect(posts).toBe(0);
-
-  await page.unroute("**/*");
-  posts = 0;
-  await page.route(MOCK, async (route) => {
-    posts += 1;
-    await route.fulfill({ status: 200, contentType: "text/html", body: "<p>ok</p>" });
+  await page.evaluate(() => {
+    window.postMessage({ fonte: "vagas-do-buteco", ok: true, mensagem: "" }, "*");
   });
-  await page.locator("form").evaluate((form, url) => {
-    form.action = url;
-  }, MOCK);
+  await expect(page.locator("[data-ok]")).toBeHidden();
+
+  await page.locator('input[name="consentimento"]').check();
   await page.locator('input[name="website"]').fill("http://bot.example", { force: true });
   await page.getByRole("button", { name: "Publicar minha apresentação" }).click();
   await page.waitForTimeout(300);
@@ -173,7 +165,7 @@ test("candidato valida obrigatórios, url, consentimento, honeypot e envia ao en
   await expect(page.locator("[data-ok]")).toBeHidden();
 
   await page.locator('input[name="website"]').fill("", { force: true });
-  const pedido = page.waitForRequest((req) => req.method() === "POST" && req.url() === MOCK);
+  const pedido = page.waitForRequest((req) => req.method() === "POST" && req.url() === SCRIPT_URL);
   await page.getByRole("button", { name: "Publicar minha apresentação" }).click();
   const enviado = await pedido;
   const corpo = enviado.postData() || "";
@@ -201,13 +193,11 @@ test("vaga valida obrigatórios, url, consentimento, honeypot e envia ao endpoin
   await expect.poll(() => page.locator('input[name="consentimento"]').evaluate((el) => el.validity.valueMissing)).toBe(true);
 
   let posts = 0;
-  await page.route(MOCK, async (route) => {
-    posts += 1;
-    await route.fulfill({ status: 200, contentType: "text/html", body: "<p>ok</p>" });
+  await page.route(SCRIPT_URL, async (route) => {
+    if (route.request().method() === "POST") posts += 1;
+    await route.fulfill({ status: 200, contentType: "text/html", body: CONFIRMACAO });
   });
-  await page.locator("form").evaluate((form, url) => {
-    form.action = url;
-  }, MOCK);
+  await expect(page.locator("form")).toHaveAttribute("action", SCRIPT_URL);
   await page.locator('input[name="consentimento"]').check();
   await page.locator('input[name="website"]').fill("http://bot.example", { force: true });
   await page.getByRole("button", { name: "Publicar vaga" }).click();
@@ -215,7 +205,7 @@ test("vaga valida obrigatórios, url, consentimento, honeypot e envia ao endpoin
   expect(posts).toBe(0);
 
   await page.locator('input[name="website"]').fill("", { force: true });
-  const pedido = page.waitForRequest((req) => req.method() === "POST" && req.url() === MOCK);
+  const pedido = page.waitForRequest((req) => req.method() === "POST" && req.url() === SCRIPT_URL);
   await page.getByRole("button", { name: "Publicar vaga" }).click();
   const corpo = (await pedido).postData() || "";
   expect(corpo).toContain("tipo=vaga");

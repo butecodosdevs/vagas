@@ -412,6 +412,7 @@ def _sincronizar_pasta(
 ) -> None:
     diretorio.mkdir(parents=True, exist_ok=True)
     vistos: set[str] = set()
+    publicou = False
     for row in rows:
         bruto = (row.get("id") or "").strip()
         if not bruto:
@@ -434,12 +435,23 @@ def _sincronizar_pasta(
             texto = render_candidato(row) if tipo == "candidato" else render_vaga(row)
             destino.write_text(texto, encoding="utf-8")
             resultado.written.append(str(destino))
+            publicou = True
             continue
         if destino.exists():
             destino.unlink()
             resultado.removed.append(str(destino))
         else:
             resultado.skipped.append(str(destino))
+    if publicou:
+        _remover_exemplos(diretorio, resultado)
+
+
+def _remover_exemplos(diretorio: Path, resultado: SyncResult) -> None:
+    """Tira os cards fictícios quando a aba já tem alguma linha publicável."""
+    for caminho in diretorio.glob("*.md"):
+        if _arquivo_exemplo(caminho):
+            caminho.unlink()
+            resultado.removed.append(str(caminho))
 
 
 def sync_content(
@@ -450,8 +462,8 @@ def sync_content(
 ) -> SyncResult:
     """Escreve os Markdown publicados e apaga os que deixaram de ser públicos.
 
-    Arquivos que não estão na planilha (os exemplos do repositório, por exemplo)
-    permanecem. Um arquivo com `exemplo: true` também não é sobrescrito.
+    Sem linha publicável na aba, os arquivos `exemplo: true` ficam. Com ao
+    menos uma linha publicável, os exemplos daquela coleção saem.
     """
     raiz = Path(content_root)
     resultado = SyncResult()

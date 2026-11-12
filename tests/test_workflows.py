@@ -17,10 +17,23 @@ def test_ci_so_le_o_repositorio_e_nao_imprime_o_secret():
     assert "id-token" not in texto
     assert "pages:" not in texto
     assert "pull_request_target" not in texto
+    assert "GOOGLE_SERVICE_ACCOUNT_JSON" not in texto
+    assert "printenv" not in texto
+
+
+def test_checagem_da_planilha_nao_executa_o_codigo_do_pr():
+    texto = _ler("sheet-check.yml")
+    assert "pull_request_target:" in texto
+    assert "workflow_dispatch:" in texto
+    assert "contents: read" in texto
+    assert "contents: write" not in texto
+    assert "persist-credentials: false" in texto
+    assert "pull_request.base.sha" in texto
+    assert "head.sha" not in texto
+    assert "head.repo.full_name" in texto
     assert "secrets.GOOGLE_SERVICE_ACCOUNT_JSON" in texto
     assert 'echo "$GOOGLE_SERVICE_ACCOUNT_JSON"' not in texto
     assert "printenv" not in texto
-    assert "head.repo.full_name" in texto
 
 
 def test_deploy_pede_pages_e_id_token_so_no_job_de_publicacao():
@@ -51,7 +64,12 @@ def test_sync_escreve_so_conteudo_e_so_faz_commit_com_diff():
     assert "printenv" not in texto
 
 
-def test_nenhum_workflow_usa_pull_request_target():
-    juntos = "\n".join(_ler(caminho.name) for caminho in WORKFLOWS.glob("*.yml"))
-    assert "pull_request_target" not in juntos
+def test_pull_request_target_so_na_checagem_da_planilha():
+    for caminho in WORKFLOWS.glob("*.yml"):
+        texto = caminho.read_text(encoding="utf-8")
+        if caminho.name == "sheet-check.yml":
+            assert "pull_request_target" in texto
+        else:
+            assert "pull_request_target" not in texto, caminho.name
     assert "GOOGLE_SERVICE_ACCOUNT_JSON" not in _ler("deploy.yml")
+    assert "GOOGLE_SERVICE_ACCOUNT_JSON" not in _ler("ci.yml")
