@@ -59,7 +59,7 @@ O campo escondido `website` é um honeypot. Se vier preenchido, o script respond
 
 ## O que o mantenedor ainda configura
 
-- Publicar o Apps Script e colocar a URL em `vagas.script-url`.
+- Publicar o Apps Script e colocar a URL `/exec` em `scriptUrl`, no arquivo `data/forms.yaml`. O arquivo no repositório ainda está com `PLACEHOLDER`, e enquanto estiver assim o formulário avisa e não envia.
 - Em **Settings > Pages**, fonte **GitHub Actions**.
 - Se a branch `main` estiver protegida, permitir o push do `github-actions[bot]` para o workflow de sync criar o commit.
 - Opcional: variável de repositório `MODERATION_ENABLED` (`true` ou `false`, padrão `false`) e a propriedade homônima no Apps Script.

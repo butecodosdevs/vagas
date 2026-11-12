@@ -20,4 +20,6 @@ consentimento: "sim"
 
 Este registro é um exemplo fictício, só para o site renderizar antes da planilha entrar no ar. Não é uma vaga nem uma pessoa real.
 
-- [https://example.com/ana-souza](https://example.com/ana-souza)
+<ul class="links">
+<li><a href="https://example.com/ana-souza" rel="noopener noreferrer">https://example.com/ana-souza</a></li>
+</ul>

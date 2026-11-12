@@ -173,8 +173,12 @@ def normalizar_modalidade(valor: str) -> str:
     }.get(chave, "")
 
 
+# Caracteres que quebram HTML, Markdown ou o Qute quando a URL cai num template.
+_URL_PERIGOSO = re.compile(r"""[<>"'`{}\\]|[\x00-\x1f\u0085\u2028\u2029]""")
+
+
 def validar_urls(texto: str) -> list[str]:
-    """Devolve só URLs http(s). Esquemas como javascript: são descartados."""
+    """Devolve só URLs http(s) com domínio. javascript: e HTML/Qute são descartados."""
     if not texto:
         return []
     encontradas: list[str] = []
@@ -182,13 +186,13 @@ def validar_urls(texto: str) -> list[str]:
     for pedaco in re.split(r"[\s,;]+", str(texto).strip()):
         if not pedaco:
             continue
-        url = pedaco.rstrip(").,]>\"'")
+        url = pedaco.rstrip(".,]>\"'")
         if not re.match(r"https?://", url, re.IGNORECASE):
             continue
-        partes = urlparse(url)
-        if partes.scheme.lower() not in {"http", "https"} or not partes.netloc:
+        if _URL_PERIGOSO.search(url):
             continue
-        if any(ch.isspace() for ch in url):
+        partes = urlparse(url)
+        if partes.scheme.lower() not in {"http", "https"} or not partes.hostname:
             continue
         if url not in vistas:
             vistas.add(url)
@@ -201,6 +205,15 @@ def _limitar(valor: str, limite: int) -> str:
     if len(texto) <= limite:
         return texto
     return texto[: limite - 1].rstrip() + "…"
+
+
+def _html(valor: str) -> str:
+    return (
+        valor.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+    )
 
 
 def _neutralizar_qute(valor: str) -> str:
@@ -220,7 +233,7 @@ def yaml_quote(valor: str) -> str:
             saida.append("\\n")
         elif caractere == "\t":
             saida.append("\\t")
-        elif ord(caractere) < 32:
+        elif ord(caractere) < 32 or caractere in "\u0085\u2028\u2029":
             saida.append(f"\\u{ord(caractere):04x}")
         else:
             saida.append(caractere)
@@ -369,9 +382,13 @@ def _documento(
         "Apresentação publicada no mural Vagas do Buteco. Os dados públicos estão nos campos acima."
     )
     if links:
+        # HTML escapado, não Markdown: um ")" no meio da URL não fecha o link.
         linhas.append("")
+        linhas.append('<ul class="links">')
         for url in links:
-            linhas.append(f"- [{url}]({url})")
+            seguro = _html(_neutralizar_qute(url))
+            linhas.append(f'<li><a href="{seguro}" rel="noopener noreferrer">{seguro}</a></li>')
+        linhas.append("</ul>")
     linhas.append("")
     return "\n".join(linhas)
 

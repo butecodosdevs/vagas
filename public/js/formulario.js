@@ -4,6 +4,11 @@
     var ok = form.parentElement.querySelector("[data-ok]");
     var frame = form.querySelector("iframe");
     form.addEventListener("submit", function (evento) {
+      var pote = form.querySelector('[name="website"]');
+      if (pote && pote.value.trim()) {
+        evento.preventDefault();
+        return;
+      }
       if (form.action.indexOf("PLACEHOLDER") !== -1) {
         evento.preventDefault();
         if (aviso) {
