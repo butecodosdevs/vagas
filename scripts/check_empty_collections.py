@@ -7,6 +7,7 @@ e pede as listagens. Os arquivos voltam ao lugar mesmo se a geração falhar.
 
 from __future__ import annotations
 
+import os
 import shutil
 import socket
 import subprocess
@@ -77,7 +78,14 @@ def main() -> int:
     if not movidos:
         print("Nenhum Markdown de vaga ou candidato para afastar.", file=sys.stderr)
     try:
-        subprocess.run(["roq", "generate"], cwd=RAIZ, check=True)
+        ambiente = os.environ.copy()
+        ambiente["QUARKUS_ROQ_GENERATOR_BATCH"] = "true"
+        subprocess.run(
+            [str(RAIZ / "mvnw"), "-B", "package", "quarkus:run", "-DskipTests"],
+            cwd=RAIZ,
+            check=True,
+            env=ambiente,
+        )
         publicado = Path(tempfile.mkdtemp(prefix="vagas-http-"))
         shutil.copytree(RAIZ / "target" / "roq", publicado / "vagas")
         porta = _porta_livre()
