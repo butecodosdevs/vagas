@@ -13,6 +13,7 @@ description: Vagas publicadas no mural Vagas do Buteco.
   </header>
   {#include partials/filtros /}
   <div class="lista" data-lista>
+    {#if site.collections.vagas}
     {#for vaga in site.collections.vagas.sortByDate(true)}
     <article class="cartao" data-cartao data-modalidade="{=vaga.data('modalidade')}" data-busca="{=vaga.data('empresa')} {=vaga.data('cargo_senioridade')} {=vaga.data('requisitos_obrigatorios')} {=vaga.data('experiencia_desejavel')}">
       {#if vaga.data('exemplo')}<p class="selo">Exemplo</p>{/if}
@@ -26,6 +27,9 @@ description: Vagas publicadas no mural Vagas do Buteco.
     {#else}
     <p class="vazio">Ainda não há vagas publicadas.</p>
     {/for}
+    {#else}
+    <p class="vazio">Ainda não há vagas publicadas.</p>
+    {/if}
   </div>
   <p class="vazio" data-vazio hidden>Nenhuma vaga com esse filtro.</p>
 </section>

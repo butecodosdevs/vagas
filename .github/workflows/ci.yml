@@ -34,12 +34,12 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
-      - name: Instalar o Roq
-        run: |
-          curl -Ls https://sh.jbang.dev | bash -s - app install --fresh --force roq@quarkiverse/quarkus-roq
-          echo "$HOME/.jbang/bin" >> "$GITHUB_PATH"
       - name: Gerar o site
-        run: roq generate
+        run: ./mvnw -B package quarkus:run -DskipTests
+        env:
+          QUARKUS_ROQ_GENERATOR_BATCH: "true"
+      - name: Gerar de novo sem vagas nem candidatos
+        run: python3 scripts/check_empty_collections.py
 
   e2e:
     name: Playwright
@@ -56,12 +56,10 @@ jobs:
           node-version: "22"
           cache: npm
           cache-dependency-path: e2e/package-lock.json
-      - name: Instalar o Roq
-        run: |
-          curl -Ls https://sh.jbang.dev | bash -s - app install --fresh --force roq@quarkiverse/quarkus-roq
-          echo "$HOME/.jbang/bin" >> "$GITHUB_PATH"
       - name: Gerar o site
-        run: roq generate
+        run: ./mvnw -B package quarkus:run -DskipTests
+        env:
+          QUARKUS_ROQ_GENERATOR_BATCH: "true"
       - name: Instalar o Playwright
         working-directory: e2e
         run: npm ci
