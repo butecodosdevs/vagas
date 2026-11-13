@@ -40,6 +40,8 @@ jobs:
           echo "$HOME/.jbang/bin" >> "$GITHUB_PATH"
       - name: Gerar o site
         run: roq generate
+      - name: Gerar de novo sem vagas nem candidatos
+        run: python3 scripts/check_empty_collections.py
 
   e2e:
     name: Playwright

@@ -54,12 +54,12 @@ test("home, vagas e candidatos renderizam com a marca do Buteco", async ({ page 
 
   await page.goto("candidatos/");
   await expect(page.getByRole("heading", { level: 1, name: "Candidatos" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Ana Souza (exemplo)" })).toBeVisible();
+  await expect(page.getByText("Ainda não há apresentações publicadas.")).toBeVisible();
   await semViolacao(page);
   await page.screenshot({ path: `${ARTEFATOS}/candidatos.png`, fullPage: true });
 
-  await page.goto("candidatos/exemplo-candidato-ana/");
-  const link = page.locator('a[href="https://example.com/ana-souza"]');
+  await page.goto("vagas/exemplo-vaga-backend/");
+  const link = page.locator('a[href="https://example.com/vagas/backend"]');
   await expect(link).toBeVisible();
   await expect(link).toHaveAttribute("rel", /noopener/);
   await expect(link).not.toContainText("<script>");

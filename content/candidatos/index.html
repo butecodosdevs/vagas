@@ -13,6 +13,7 @@ description: Apresentações de quem está na procura no mural Vagas do Buteco.
   </header>
   {#include partials/filtros /}
   <div class="grade-cards" data-lista>
+    {#if site.collections.candidatos}
     {#for pessoa in site.collections.candidatos.sortByDate(true)}
     <article class="cartao" data-cartao data-modalidade="{=pessoa.data('modalidade')}" data-busca="{=pessoa.data('nome')} {=pessoa.data('cargo_senioridade')} {=pessoa.data('stack')} {=pessoa.data('resumo_experiencia')}">
       {#if pessoa.data('exemplo')}<p class="selo">Exemplo</p>{/if}
@@ -27,6 +28,9 @@ description: Apresentações de quem está na procura no mural Vagas do Buteco.
     {#else}
     <p class="vazio">Ainda não há apresentações publicadas.</p>
     {/for}
+    {#else}
+    <p class="vazio">Ainda não há apresentações publicadas.</p>
+    {/if}
   </div>
   <p class="vazio" data-vazio hidden>Nenhuma apresentação com esse filtro.</p>
 </section>
