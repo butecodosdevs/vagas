@@ -1,5 +1,6 @@
 """Testes do gerador de conteúdo a partir de linhas da planilha."""
 
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -11,6 +12,7 @@ from contentgen import (
     HeaderMismatch,
     SheetError,
     conferir_cabecalho,
+    dias_maximos_vaga,
     normalizar_modalidade,
     rows_from_values,
     sanitizar_mensagem,
@@ -18,6 +20,7 @@ from contentgen import (
     slug_from_id,
     sync_content,
     validar_urls,
+    vaga_expirada,
 )
 
 CANDIDATO_HEADERS = [
@@ -310,3 +313,43 @@ def test_moderacao_desligada_publica_pendente_e_publicado(tmp_path: Path):
     )
     assert (content / "candidatos" / "c-pub.md").is_file()
     assert (content / "candidatos" / "c-pen.md").is_file()
+
+
+def test_dias_maximos_padrao_e_valor_invalido():
+    assert dias_maximos_vaga(None) == 60
+    assert dias_maximos_vaga("") == 60
+    assert dias_maximos_vaga("abc") == 60
+    assert dias_maximos_vaga("-3") == 60
+    assert dias_maximos_vaga("15") == 15
+
+
+def test_vaga_velha_sai_e_candidato_velho_fica(tmp_path: Path):
+    agora = datetime(2026, 11, 13, 12, 0, tzinfo=timezone.utc)
+    content = tmp_path / "content"
+    velha = content / "vagas" / "v-velha.md"
+    velha.parent.mkdir(parents=True)
+    velha.write_text("antiga\n", encoding="utf-8")
+    sync_content(
+        content,
+        [candidato(id="c-velho", criado_em="2026-01-01T00:00:00-03:00", nome="Antigo")],
+        [
+            vaga(id="v-velha", criado_em="2026-08-01T00:00:00-03:00", empresa="Velha"),
+            vaga(id="v-nova", criado_em="2026-11-01T00:00:00-03:00", empresa="Nova"),
+            vaga(id="v-sem-data", criado_em="", empresa="Sem data"),
+        ],
+        moderation_enabled=False,
+        max_dias_vaga=60,
+        agora=agora,
+    )
+    assert not velha.exists()
+    assert (content / "vagas" / "v-nova.md").is_file()
+    assert (content / "vagas" / "v-sem-data.md").is_file()
+    assert (content / "candidatos" / "c-velho.md").is_file()
+    assert vaga_expirada("2026-09-14T12:00:00+00:00", agora, 60) is False
+    assert vaga_expirada("2026-01-01 12:00", agora, 60) is True
+    assert vaga_expirada("2026-01-01 12:00 -0300", agora, 60) is True
+    assert vaga_expirada(
+        (agora - timedelta(days=60, minutes=1)).strftime("%Y-%m-%dT%H:%M:%S+00:00"),
+        agora,
+        60,
+    )

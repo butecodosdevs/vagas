@@ -5,6 +5,7 @@ Variáveis:
   GOOGLE_SERVICE_ACCOUNT_JSON  JSON da conta de serviço (obrigatório)
   SHEET_ID                      id da planilha (padrão: a planilha do Buteco)
   MODERATION_ENABLED            true publica só status aprovado (padrão: false)
+  VAGA_MAX_DIAS                 vaga mais velha que isto sai do mural (padrão: 60)
 """
 
 from __future__ import annotations
@@ -19,6 +20,7 @@ from contentgen import (
     CANDIDATO_HEADERS,
     DEFAULT_SHEET_ID,
     VAGA_HEADERS,
+    dias_maximos_vaga,
     rows_from_values,
     sanitizar_mensagem,
     sync_content,
@@ -85,9 +87,11 @@ def _executar() -> int:
     candidatos = fetch_tab(servico, identificador, "Candidatos", CANDIDATO_HEADERS)
     vagas = fetch_tab(servico, identificador, "Vagas", VAGA_HEADERS)
     raiz = Path(__file__).resolve().parents[1] / "content"
-    resultado = sync_content(raiz, candidatos, vagas, moderation_enabled())
+    limite = dias_maximos_vaga(os.environ.get("VAGA_MAX_DIAS"))
+    resultado = sync_content(raiz, candidatos, vagas, moderation_enabled(), max_dias_vaga=limite)
     print(f"Planilha {identificador}")
     print(f"Moderação: {'ligada' if moderation_enabled() else 'desligada'}")
+    print(f"Vaga expira depois de {limite} dias")
     print(
         f"Escritos: {len(resultado.written)}; "
         f"removidos: {len(resultado.removed)}; "

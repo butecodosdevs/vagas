@@ -29,6 +29,7 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           SHEET_ID: ${{ secrets.SHEET_ID || vars.SHEET_ID || '1mMjsxHBRritkBUIEz4-TsNLBofVC7crG8WNrSwtegsQ' }}
           MODERATION_ENABLED: ${{ vars.MODERATION_ENABLED || 'false' }}
+          VAGA_MAX_DIAS: ${{ vars.VAGA_MAX_DIAS || '60' }}
         run: python scripts/sync_sheet.py
       - name: Commit só se houver diff
         run: |

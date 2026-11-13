@@ -1,0 +1,64 @@
+name: Alertar falha de workflow
+
+on:
+  workflow_run:
+    workflows: ["Sincronizar planilha", "Publicar site"]
+    types: [completed]
+
+permissions:
+  actions: read
+  issues: write
+
+jobs:
+  avisar:
+    name: Abrir ou fechar o aviso
+    if: github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Atualizar o issue falha-workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NOME: ${{ github.event.workflow_run.name }}
+          CONCLUSAO: ${{ github.event.workflow_run.conclusion }}
+          URL_RUN: ${{ github.event.workflow_run.html_url }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          if [ "$CONCLUSAO" != "failure" ] && [ "$CONCLUSAO" != "success" ]; then
+            echo "Conclusão ${CONCLUSAO} ignorada."
+            exit 0
+          fi
+          jobs=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/jobs" --jq '.jobs[].conclusion')
+          if [ -z "$jobs" ]; then
+            echo "Execução sem jobs. Nada a fazer."
+            exit 0
+          fi
+          if ! printf '%s\n' "$jobs" | grep -qv skipped; then
+            echo "Todos os jobs foram ignorados. Nada a fazer."
+            exit 0
+          fi
+          if ! gh label list --repo "$GITHUB_REPOSITORY" --limit 200 --json name --jq '.[].name' | grep -qx 'falha-workflow'; then
+            gh label create falha-workflow --repo "$GITHUB_REPOSITORY" --color B60205 --description "Falha de workflow na main"
+          fi
+          titulo="Falha na main: ${NOME}"
+          abertos=$(gh issue list --repo "$GITHUB_REPOSITORY" --label falha-workflow --state open --json number,title --jq ".[] | select(.title == \"${titulo}\") | .number")
+          if [ "$CONCLUSAO" = "failure" ]; then
+            corpo=$(printf 'O workflow **%s** falhou na branch main.\n\n- Execução: %s\n- Commit: `%s`\n\nEste aviso fica aberto até o mesmo workflow concluir com sucesso. O significado está em docs/operacao.md.\n' "$NOME" "$URL_RUN" "$SHA")
+            if [ -z "$abertos" ]; then
+              gh issue create --repo "$GITHUB_REPOSITORY" --title "$titulo" --label falha-workflow --body "$corpo"
+            else
+              printf '%s\n' "$abertos" | while read -r numero; do
+                gh issue comment "$numero" --repo "$GITHUB_REPOSITORY" --body "$corpo"
+              done
+            fi
+            exit 0
+          fi
+          if [ -z "$abertos" ]; then
+            echo "Nenhum aviso aberto para ${NOME}."
+            exit 0
+          fi
+          fecho=$(printf 'O workflow **%s** concluiu com sucesso.\n\n- Execução: %s\n- Commit: `%s`\n\nFechando só o aviso deste workflow.\n' "$NOME" "$URL_RUN" "$SHA")
+          printf '%s\n' "$abertos" | while read -r numero; do
+            gh issue close "$numero" --repo "$GITHUB_REPOSITORY" --reason completed --comment "$fecho"
+          done

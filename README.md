@@ -86,6 +86,7 @@ npm test
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | Secret | JSON da conta de serviço. O CI e o sync leem a planilha. Nunca vai para o log. |
 | `SHEET_ID` | Secret ou variável, opcional | Id da planilha. Sem isso, vale o id padrão acima. |
 | `MODERATION_ENABLED` | Variável de repositório, opcional | `true` ou `false`. Padrão `false`. |
+| `VAGA_MAX_DIAS` | Variável de repositório, opcional | Vaga mais velha que isto sai do mural. Padrão `60`. Candidato não expira. |
 
 A URL do Apps Script fica em `data/forms.yaml`, na chave `scriptUrl`. O valor atual é `https://script.google.com/macros/s/AKfycbzpI1PDL1ShmXnN5EzSgwB-B6hSN6T0Z4h6zdDYDFBJtQYocrB0OHNt4YdhxFsFFsuA/exec`. Se a chave voltar a conter `PLACEHOLDER`, o formulário avisa e não envia.
 
@@ -95,6 +96,8 @@ A URL do Apps Script fica em `data/forms.yaml`, na chave `scriptUrl`. O valor at
 - **Checagem da planilha**: `pull_request_target` (código da branch padrão, nunca o do PR) e `workflow_dispatch`. Autentica com o secret, lê a linha 1 de **Candidatos** e **Vagas** e compara com o esquema. Não imprime o JSON. Fork não roda. O workflow só passa a valer depois do merge em `main`.
 - **Sincronizar planilha**: cron `0 */6 * * *` e disparo manual. Commit só quando o Markdown mudou.
 - **Publicar site**: push em `main`, disparo manual e depois de uma sincronização bem-sucedida. Gera com Roq e publica com `actions/deploy-pages`.
+- **Alertar falha de workflow**: se o sync ou a publicação falham na `main`, abre ou comenta um issue com o rótulo `falha-workflow`. Uma execução posterior bem-sucedida fecha o aviso.
+- O CI também confere os links internos do HTML gerado, sem sair da rede. Acessibilidade com axe, nas páginas home, vagas, candidatos e nos dois formulários, já roda no Playwright.
 
 Em **Settings > Pages**, a fonte precisa ser **GitHub Actions**.
 
@@ -107,4 +110,4 @@ Em **Settings > Pages**, a fonte precisa ser **GitHub Actions**.
 5. Opcional: `MODERATION_ENABLED` no repositório e a propriedade de mesmo nome no Apps Script.
 6. Opcional: `SHEET_ID`, se a planilha for outra.
 
-O guia da planilha, do script e da conta de serviço está em [docs/setup-google.md](docs/setup-google.md).
+O guia da planilha, do script e da conta de serviço está em [docs/setup-google.md](docs/setup-google.md). O dia a dia (remover uma entrada, expiração, sync manual, moderação e o aviso de falha) está em [docs/operacao.md](docs/operacao.md).

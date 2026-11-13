@@ -10,10 +10,12 @@ from __future__ import annotations
 import re
 import unicodedata
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 
 DEFAULT_SHEET_ID = "1mMjsxHBRritkBUIEz4-TsNLBofVC7crG8WNrSwtegsQ"
+DIAS_PADRAO_VAGA = 60
 
 CANDIDATO_HEADERS = [
     "id",
@@ -267,6 +269,49 @@ def _data_publicacao(valor: str) -> str:
     return f"{data} {hora}{segundos}{fuso}"
 
 
+def dias_maximos_vaga(valor: str | None = None) -> int:
+    """Lê VAGA_MAX_DIAS. Vazio, inválido ou negativo volta ao padrão de 60."""
+    if valor is None or str(valor).strip() == "":
+        return DIAS_PADRAO_VAGA
+    try:
+        dias = int(str(valor).strip())
+    except ValueError:
+        return DIAS_PADRAO_VAGA
+    if dias < 0:
+        return DIAS_PADRAO_VAGA
+    return dias
+
+
+def instante_criado(valor: str) -> datetime | None:
+    normalizado = _data_publicacao(valor)
+    if not normalizado:
+        return None
+    for formato in (
+        "%Y-%m-%d %H:%M:%S %z",
+        "%Y-%m-%d %H:%M %z",
+        "%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%d %H:%M",
+        "%Y-%m-%d",
+    ):
+        try:
+            momento = datetime.strptime(normalizado, formato)
+        except ValueError:
+            continue
+        if momento.tzinfo is None:
+            return momento.replace(tzinfo=timezone.utc)
+        return momento
+    return None
+
+
+def vaga_expirada(criado_em: str, agora: datetime, max_dias: int) -> bool:
+    """Verdadeiro se a vaga foi criada há mais dias do que o limite."""
+    momento = instante_criado(criado_em)
+    if momento is None:
+        return False
+    referencia = agora if agora.tzinfo else agora.replace(tzinfo=timezone.utc)
+    return referencia - momento > timedelta(days=max_dias)
+
+
 def _arquivo_exemplo(caminho: Path) -> bool:
     if not caminho.is_file():
         return False
@@ -409,6 +454,8 @@ def _sincronizar_pasta(
     tipo: str,
     moderation_enabled: bool,
     resultado: SyncResult,
+    max_dias: int | None = None,
+    agora: datetime | None = None,
 ) -> None:
     diretorio.mkdir(parents=True, exist_ok=True)
     vistos: set[str] = set()
@@ -431,7 +478,13 @@ def _sincronizar_pasta(
         if _arquivo_exemplo(destino):
             resultado.skipped.append(str(destino))
             continue
-        if _publicar_linha(row, tipo, moderation_enabled):
+        expirada = (
+            tipo == "vaga"
+            and agora is not None
+            and max_dias is not None
+            and vaga_expirada(row.get("criado_em", ""), agora, max_dias)
+        )
+        if not expirada and _publicar_linha(row, tipo, moderation_enabled):
             texto = render_candidato(row) if tipo == "candidato" else render_vaga(row)
             destino.write_text(texto, encoding="utf-8")
             resultado.written.append(str(destino))
@@ -459,14 +512,28 @@ def sync_content(
     candidatos: list[dict[str, str]],
     vagas: list[dict[str, str]],
     moderation_enabled: bool,
+    max_dias_vaga: int = DIAS_PADRAO_VAGA,
+    agora: datetime | None = None,
 ) -> SyncResult:
     """Escreve os Markdown publicados e apaga os que deixaram de ser públicos.
 
     Sem linha publicável na aba, os arquivos `exemplo: true` ficam. Com ao
-    menos uma linha publicável, os exemplos daquela coleção saem.
+    menos uma linha publicável, os exemplos daquela coleção saem. Vaga mais
+    velha que `max_dias_vaga` sai do mural. Candidato não expira.
     """
     raiz = Path(content_root)
+    momento = agora or datetime.now(timezone.utc)
+    if momento.tzinfo is None:
+        momento = momento.replace(tzinfo=timezone.utc)
     resultado = SyncResult()
     _sincronizar_pasta(raiz / "candidatos", candidatos, "candidato", moderation_enabled, resultado)
-    _sincronizar_pasta(raiz / "vagas", vagas, "vaga", moderation_enabled, resultado)
+    _sincronizar_pasta(
+        raiz / "vagas",
+        vagas,
+        "vaga",
+        moderation_enabled,
+        resultado,
+        max_dias=max_dias_vaga,
+        agora=momento,
+    )
     return resultado
