@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+from check_internal_links import arquivo_do_link, eh_interno, verificar
+
 RAIZ = Path(__file__).resolve().parents[1]
 WORKFLOWS = RAIZ / ".github" / "workflows"
 
@@ -64,6 +66,23 @@ def test_sync_escreve_so_conteudo_e_so_faz_commit_com_diff():
     assert "printenv" not in texto
 
 
+def test_alerta_de_falha_so_usa_o_token_e_issues():
+    texto = _ler("alerta-falha.yml")
+    assert 'workflows: ["Sincronizar planilha", "Publicar site"]' in texto
+    assert "types: [completed]" in texto
+    assert "head_branch == 'main'" in texto
+    assert "issues: write" in texto
+    assert "actions: read" in texto
+    assert "contents:" not in texto
+    assert "pull_request" not in texto
+    assert "falha-workflow" in texto
+    assert "secrets." not in texto
+    assert "github.token" in texto
+    assert "issue create" in texto
+    assert "issue close" in texto
+    assert "issue comment" in texto
+
+
 def test_pull_request_target_so_na_checagem_da_planilha():
     for caminho in WORKFLOWS.glob("*.yml"):
         texto = caminho.read_text(encoding="utf-8")
@@ -73,3 +92,24 @@ def test_pull_request_target_so_na_checagem_da_planilha():
             assert "pull_request_target" not in texto, caminho.name
     assert "GOOGLE_SERVICE_ACCOUNT_JSON" not in _ler("deploy.yml")
     assert "GOOGLE_SERVICE_ACCOUNT_JSON" not in _ler("ci.yml")
+
+
+def test_links_internos_ignoram_a_rede_e_acham_arquivo(tmp_path: Path):
+    site = tmp_path / "roq"
+    (site / "vagas").mkdir(parents=True)
+    (site / "vagas" / "index.html").write_text(
+        '<a href="/vagas/vagas/">Vagas</a><a href="https://discord.gg/buteco-dos-devs">Discord</a>'
+        '<img src="/vagas/images/logo.png">',
+        encoding="utf-8",
+    )
+    (site / "images").mkdir()
+    (site / "images" / "logo.png").write_bytes(b"png")
+    assert eh_interno("/vagas/vagas/")
+    assert eh_interno("#conteudo") is False
+    assert eh_interno("https://example.com") is False
+    assert arquivo_do_link("/vagas/vagas/", site) == site / "vagas" / "index.html"
+    assert verificar(site) == []
+    (site / "index.html").write_text('<a href="/vagas/sumiu/">Quebrou</a>', encoding="utf-8")
+    faltando = verificar(site)
+    assert len(faltando) == 1
+    assert "/vagas/sumiu/" in faltando[0]

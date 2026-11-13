@@ -38,6 +38,8 @@ jobs:
         run: ./mvnw -B package quarkus:run -DskipTests
         env:
           QUARKUS_ROQ_GENERATOR_BATCH: "true"
+      - name: Conferir links internos
+        run: python3 scripts/check_internal_links.py
       - name: Gerar de novo sem vagas nem candidatos
         run: python3 scripts/check_empty_collections.py
 
