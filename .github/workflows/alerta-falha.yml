@@ -41,11 +41,12 @@ jobs:
           if ! gh label list --repo "$GITHUB_REPOSITORY" --limit 200 --json name --jq '.[].name' | grep -qx 'falha-workflow'; then
             gh label create falha-workflow --repo "$GITHUB_REPOSITORY" --color B60205 --description "Falha de workflow na main"
           fi
-          abertos=$(gh issue list --repo "$GITHUB_REPOSITORY" --label falha-workflow --state open --json number --jq '.[].number')
+          titulo="Falha na main: ${NOME}"
+          abertos=$(gh issue list --repo "$GITHUB_REPOSITORY" --label falha-workflow --state open --json number,title --jq ".[] | select(.title == \"${titulo}\") | .number")
           if [ "$CONCLUSAO" = "failure" ]; then
-            corpo=$(printf 'O workflow **%s** falhou na branch main.\n\n- Execução: %s\n- Commit: `%s`\n\nEste aviso fica aberto até uma execução posterior, que não tenha sido só ignorada, concluir com sucesso. O significado está em docs/operacao.md.\n' "$NOME" "$URL_RUN" "$SHA")
+            corpo=$(printf 'O workflow **%s** falhou na branch main.\n\n- Execução: %s\n- Commit: `%s`\n\nEste aviso fica aberto até o mesmo workflow concluir com sucesso. O significado está em docs/operacao.md.\n' "$NOME" "$URL_RUN" "$SHA")
             if [ -z "$abertos" ]; then
-              gh issue create --repo "$GITHUB_REPOSITORY" --title "Falha de workflow na main" --label falha-workflow --body "$corpo"
+              gh issue create --repo "$GITHUB_REPOSITORY" --title "$titulo" --label falha-workflow --body "$corpo"
             else
               printf '%s\n' "$abertos" | while read -r numero; do
                 gh issue comment "$numero" --repo "$GITHUB_REPOSITORY" --body "$corpo"
@@ -54,10 +55,10 @@ jobs:
             exit 0
           fi
           if [ -z "$abertos" ]; then
-            echo "Nenhum aviso aberto."
+            echo "Nenhum aviso aberto para ${NOME}."
             exit 0
           fi
-          fecho=$(printf 'O workflow **%s** concluiu com sucesso.\n\n- Execução: %s\n- Commit: `%s`\n\nFechando este aviso.\n' "$NOME" "$URL_RUN" "$SHA")
+          fecho=$(printf 'O workflow **%s** concluiu com sucesso.\n\n- Execução: %s\n- Commit: `%s`\n\nFechando só o aviso deste workflow.\n' "$NOME" "$URL_RUN" "$SHA")
           printf '%s\n' "$abertos" | while read -r numero; do
             gh issue close "$numero" --repo "$GITHUB_REPOSITORY" --reason completed --comment "$fecho"
           done

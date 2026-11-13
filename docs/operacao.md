@@ -57,6 +57,6 @@ Para desligar, apague as duas ou grave `false` nas duas. Linhas `publicado` volt
 
 O workflow **Alertar falha de workflow** escuta **Sincronizar planilha** e **Publicar site** na `main`. Ele usa só o `GITHUB_TOKEN`, com permissão de ler Actions e escrever issues.
 
-Se uma execução falha de verdade, ele abre um issue com o rótulo `falha-workflow` e o link da execução. Se já existe um issue aberto com esse rótulo, ele comenta em vez de abrir outro. Uma execução posterior que conclui com sucesso comenta e fecha o aviso. Execução em que todos os jobs foram ignorados não abre nem fecha nada: é o caso do deploy que nem começa porque o sync falhou.
+Se uma execução falha de verdade, ele abre um issue com o rótulo `falha-workflow`, título `Falha na main: <workflow>` e o link da execução. Se esse workflow já tem um aviso aberto, ele comenta nele. Uma execução posterior **do mesmo workflow** que conclui com sucesso comenta e fecha só esse aviso. O sucesso de **Publicar site** não fecha o aviso de **Sincronizar planilha**, nem o contrário. Execução em que todos os jobs foram ignorados não abre nem fecha nada: é o caso do deploy que nem começa porque o sync falhou.
 
 O aviso significa que o mural automático parou naquele passo. O site no ar continua na última publicação que deu certo.

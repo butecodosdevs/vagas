@@ -76,6 +76,8 @@ def test_alerta_de_falha_so_usa_o_token_e_issues():
     assert "contents:" not in texto
     assert "pull_request" not in texto
     assert "falha-workflow" in texto
+    assert "Falha na main:" in texto
+    assert "mesmo workflow" in texto or "select(.title" in texto
     assert "secrets." not in texto
     assert "github.token" in texto
     assert "issue create" in texto
@@ -107,7 +109,11 @@ def test_links_internos_ignoram_a_rede_e_acham_arquivo(tmp_path: Path):
     assert eh_interno("/vagas/vagas/")
     assert eh_interno("#conteudo") is False
     assert eh_interno("https://example.com") is False
-    assert arquivo_do_link("/vagas/vagas/", site) == site / "vagas" / "index.html"
+    assert eh_interno("https://butecodosdevs.github.io/vagas/images/logo.png")
+    assert arquivo_do_link("/vagas/vagas/", site) == (site / "vagas" / "index.html").resolve()
+    assert arquivo_do_link("https://butecodosdevs.github.io/vagas/images/logo.png", site) == (
+        site / "images" / "logo.png"
+    ).resolve()
     assert verificar(site) == []
     (site / "index.html").write_text('<a href="/vagas/sumiu/">Quebrou</a>', encoding="utf-8")
     faltando = verificar(site)

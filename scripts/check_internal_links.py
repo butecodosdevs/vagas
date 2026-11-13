@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 RAIZ = Path(__file__).resolve().parents[1]
 SAIDA = RAIZ / "target" / "roq"
 PREFIXO = "/vagas"
+ORIGEM = "https://butecodosdevs.github.io"
 
 
 class _Coletor(HTMLParser):
@@ -20,17 +21,34 @@ class _Coletor(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         valores = {nome: valor for nome, valor in attrs if valor}
-        for chave in ("href", "src"):
-            if chave in valores:
-                self.refs.append(valores[chave])
+        for chave in ("href", "src", "content"):
+            valor = valores.get(chave)
+            if not valor:
+                continue
+            if chave == "content" and not (
+                valor.startswith("/") or valor.startswith("http://") or valor.startswith("https://")
+            ):
+                continue
+            self.refs.append(valor)
 
 
-def eh_interno(referencia: str) -> bool:
+def eh_interno(referencia: str, origem: str = ORIGEM, prefixo: str = PREFIXO) -> bool:
     texto = (referencia or "").strip()
     if not texto or texto.startswith("#") or texto.startswith("//"):
         return False
-    esquema = urlparse(texto).scheme.lower()
-    return esquema not in {"http", "https", "mailto", "tel", "javascript", "data"}
+    analisado = urlparse(texto)
+    esquema = analisado.scheme.lower()
+    if esquema in {"mailto", "tel", "javascript", "data"}:
+        return False
+    if esquema in {"http", "https"}:
+        if not origem:
+            return False
+        if analisado.netloc.lower() != urlparse(origem).netloc.lower():
+            return False
+        caminho = analisado.path or "/"
+        base = prefixo.rstrip("/") or "/"
+        return caminho == base or caminho.startswith(base + "/")
+    return True
 
 
 def arquivo_do_link(referencia: str, saida: Path, prefixo: str = PREFIXO) -> Path | None:
@@ -52,13 +70,13 @@ def arquivo_do_link(referencia: str, saida: Path, prefixo: str = PREFIXO) -> Pat
     return None
 
 
-def verificar(saida: Path = SAIDA, prefixo: str = PREFIXO) -> list[str]:
+def verificar(saida: Path = SAIDA, prefixo: str = PREFIXO, origem: str = ORIGEM) -> list[str]:
     faltando: list[str] = []
     for html in saida.rglob("*.html"):
         coletor = _Coletor()
         coletor.feed(html.read_text(encoding="utf-8"))
         for referencia in coletor.refs:
-            if not eh_interno(referencia):
+            if not eh_interno(referencia, origem, prefixo):
                 continue
             destino = arquivo_do_link(referencia, saida, prefixo)
             if destino is None or not destino.is_file():

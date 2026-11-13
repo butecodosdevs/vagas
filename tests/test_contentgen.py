@@ -346,6 +346,8 @@ def test_vaga_velha_sai_e_candidato_velho_fica(tmp_path: Path):
     assert (content / "vagas" / "v-sem-data.md").is_file()
     assert (content / "candidatos" / "c-velho.md").is_file()
     assert vaga_expirada("2026-09-14T12:00:00+00:00", agora, 60) is False
+    assert vaga_expirada("2026-01-01 12:00", agora, 60) is True
+    assert vaga_expirada("2026-01-01 12:00 -0300", agora, 60) is True
     assert vaga_expirada(
         (agora - timedelta(days=60, minutes=1)).strftime("%Y-%m-%dT%H:%M:%S+00:00"),
         agora,

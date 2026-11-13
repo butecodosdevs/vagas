@@ -286,7 +286,13 @@ def instante_criado(valor: str) -> datetime | None:
     normalizado = _data_publicacao(valor)
     if not normalizado:
         return None
-    for formato in ("%Y-%m-%d %H:%M:%S %z", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+    for formato in (
+        "%Y-%m-%d %H:%M:%S %z",
+        "%Y-%m-%d %H:%M %z",
+        "%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%d %H:%M",
+        "%Y-%m-%d",
+    ):
         try:
             momento = datetime.strptime(normalizado, formato)
         except ValueError:
