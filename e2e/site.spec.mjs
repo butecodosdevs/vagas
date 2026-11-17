@@ -1,8 +1,22 @@
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const ARTEFATOS = "/opt/cursor/artifacts";
+function diretorioArtefatos() {
+  if (process.env.PLAYWRIGHT_ARTIFACTS) return process.env.PLAYWRIGHT_ARTIFACTS;
+  if (process.env.RUNNER_TEMP) return path.join(process.env.RUNNER_TEMP, "vagas-e2e");
+  const cursor = "/opt/cursor/artifacts";
+  try {
+    fs.accessSync(cursor, fs.constants.W_OK);
+    return cursor;
+  } catch {
+    return path.join(os.tmpdir(), "vagas-e2e");
+  }
+}
+
+const ARTEFATOS = diretorioArtefatos();
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx8k9Ge5Yt1emFY9zizRvjVmDJx7xogNyyhI6Rafl6Br8adAgs0UX-r_BF5uUiJyNHh/exec";
 const CONFIRMACAO = `<!DOCTYPE html><html><body><script>parent.postMessage({fonte:"vagas-do-buteco",ok:true,mensagem:""},"*");</script></body></html>`;
 
@@ -146,6 +160,9 @@ test("candidato valida obrigatórios, url, consentimento, honeypot e envia ao en
   await expect.poll(() => page.locator('input[name="links"]').evaluate((el) => !el.validity.valid)).toBe(true);
   expect(posts).toBe(0);
 
+  await page.locator('input[name="links"]').fill("HTTPS://example.com/ana");
+  await expect.poll(() => page.locator('input[name="links"]').evaluate((el) => el.validity.patternMismatch || el.validity.typeMismatch)).toBe(false);
+
   await page.locator('input[name="links"]').fill("https://example.com/ana");
   await page.locator('input[name="consentimento"]').uncheck();
   await page.getByRole("button", { name: "Publicar minha apresentação" }).click();
@@ -183,7 +200,10 @@ test("vaga valida obrigatórios, url, consentimento, honeypot e envia ao endpoin
   await page.getByRole("button", { name: "Publicar vaga" }).click();
   await expect.poll(() => page.locator('input[name="empresa"]').evaluate((el) => el.validity.valueMissing)).toBe(true);
 
-  await preencherVaga(page, { link: "ftp://example.com/vaga" });
+  await preencherVaga(page, { link: "HTTPS://example.com/vaga" });
+  await expect.poll(() => page.locator('input[name="link_vaga"]').evaluate((el) => el.validity.patternMismatch || el.validity.typeMismatch)).toBe(false);
+
+  await page.locator('input[name="link_vaga"]').fill("ftp://example.com/vaga");
   await page.getByRole("button", { name: "Publicar vaga" }).click();
   await expect.poll(() => page.locator('input[name="link_vaga"]').evaluate((el) => el.validity.patternMismatch)).toBe(true);
 
